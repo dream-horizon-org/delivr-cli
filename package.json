@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "Management CLI for Delivr - deploy mobile app updates over-the-air",
   "main": "./script/cli.js",
-  
   "scripts": {
     "start": "node ./bin/script/cli.js",
     "build": "tsc && cp -r ./script/patch-scripts ./bin/script",
@@ -92,7 +91,7 @@
     "@types/node": "^20.3.1",
     "@types/q": "^1.5.5",
     "@types/sinon": "^10.0.15",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.45.0",
     "express": "^4.19.2",

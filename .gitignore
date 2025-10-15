@@ -29,6 +29,8 @@ node_modules
 
 # Build specific exclusions
 */bin/
+*.d.ts
+*.js.map
 
 # Environment variables
 *.env
