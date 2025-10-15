@@ -354,10 +354,7 @@ function execute(command) {
                 if (!connectionInfo) {
                     throw new Error("You are not currently logged in. Run the 'code-push-standalone login' command to authenticate with the CodePush server.");
                 }
-                // Check if command has a serverUrl override (e.g., release commands)
-                const commandServerUrl = command.serverUrl;
-                const effectiveServerUrl = commandServerUrl || connectionInfo.customServerUrl;
-                exports.sdk = getSdk(connectionInfo.accessKey, CLI_HEADERS, effectiveServerUrl);
+                exports.sdk = getSdk(connectionInfo.accessKey, CLI_HEADERS, connectionInfo.customServerUrl);
                 if (command.appName) {
                     const arg = command.appName;
                     const parsedName = cli.parseAppName(arg);
@@ -1034,7 +1031,6 @@ const release = (command) => {
         isDisabled: command.disabled,
         isMandatory: command.mandatory,
         rollout: command.rollout,
-        isBundlePatchingEnabled: command.isPatch ?? false,
     };
     return exports.sdk
         .isAuthenticated(true)

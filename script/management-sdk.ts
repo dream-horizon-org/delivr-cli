@@ -95,9 +95,7 @@ class AccountManager {
     OWNER: "Owner",
     COLLABORATOR: "Collaborator",
   };
-  // Server URL configuration with priority: CLI arg > Environment variable > Default
-  private static DEFAULT_SERVER_URL = "http://localhost:3000";
-  public static SERVER_URL = process.env.DELIVR_SERVER_URL || process.env.CODE_PUSH_SERVER_URL || AccountManager.DEFAULT_SERVER_URL;
+  public static SERVER_URL = "http://localhost:3000";
 
   private static API_VERSION: number = 2;
 

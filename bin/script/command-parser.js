@@ -387,17 +387,9 @@ yargs
     isValidCommandCategory = true;
     isValidCommand = true;
     yargs
-        .usage(USAGE_PREFIX + " link [options]")
-        .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl parameter
+        .usage(USAGE_PREFIX + " link")
+        .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl undocument parameter for testing
         .example("link", "Links an account on the CodePush server")
-        .example("link --server https://my-server.com", "Links to a custom server")
-        .option("server", {
-        alias: "s",
-        default: null,
-        demand: false,
-        description: "Custom server URL to use instead of the default. Can also be set via DELIVR_SERVER_URL environment variable",
-        type: "string",
-    })
         .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
     addCommonConfiguration(yargs);
 })
@@ -406,22 +398,14 @@ yargs
     isValidCommand = true;
     yargs
         .usage(USAGE_PREFIX + " login [options]")
-        .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl parameter
+        .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl undocument parameter for testing
         .example("login", "Logs in to the CodePush server")
         .example("login --accessKey mykey", 'Logs in on behalf of the user who owns and created the access key "mykey"')
-        .example("login --server https://my-server.com", "Logs in to a custom server")
         .option("accessKey", {
         alias: "key",
         default: null,
         demand: false,
         description: "Access key to authenticate against the CodePush server with, instead of providing your username and password credentials",
-        type: "string",
-    })
-        .option("server", {
-        alias: "s",
-        default: null,
-        demand: false,
-        description: "Custom server URL to use instead of the default. Can also be set via DELIVR_SERVER_URL environment variable",
         type: "string",
     })
         .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
@@ -552,17 +536,9 @@ yargs
     isValidCommandCategory = true;
     isValidCommand = true;
     yargs
-        .usage(USAGE_PREFIX + " register [options]")
-        .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl parameter
+        .usage(USAGE_PREFIX + " register")
+        .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl undocument parameter for testing
         .example("register", "Registers a new CodePush account")
-        .example("register --server https://my-server.com", "Registers on a custom server")
-        .option("server", {
-        alias: "s",
-        default: null,
-        demand: false,
-        description: "Custom server URL to use instead of the default. Can also be set via DELIVR_SERVER_URL environment variable",
-        type: "string",
-    })
         .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
     addCommonConfiguration(yargs);
 })
@@ -614,25 +590,11 @@ yargs
         description: "Percentage of users this release should be available to",
         type: "string",
     })
-        .option("isPatch", {
-        alias: "p",
-        demand: false,
-        default: false,
-        description: "Specify whether the update is a patch or full bundle. Default is false.",
-        type: "boolean"
-    })
         .option("compression", {
         alias: "c",
         default: "brotli",
         demand: false,
-        description: "Compression algorithm: 'brotli' (default, recommended) or 'deflate'",
-        type: "string",
-    })
-        .option("server", {
-        alias: "s",
-        default: null,
-        demand: false,
-        description: "Custom server URL to use instead of the default. Can also be set via DELIVR_SERVER_URL environment variable",
+        description: "Compression mode to be used to compress the folder. Can be either 'brotli' or 'deflate'. Default is 'brotli'. Brotli is recommended for better compression ratio and performance.",
         type: "string",
     })
         .check((argv, aliases) => {
@@ -797,12 +759,6 @@ yargs
         description: "Name of build configuration which specifies the binary version you want to target this release at. For example, 'Debug' or 'Release' (iOS only)",
         type: "string",
     })
-        .option("server", {
-        default: null,
-        demand: false,
-        description: "Custom server URL to use instead of the default. Can also be set via DELIVR_SERVER_URL environment variable",
-        type: "string",
-    })
         .check((argv, aliases) => {
         return checkValidReleaseOptions(argv);
     });
@@ -835,22 +791,22 @@ yargs
         .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
     addCommonConfiguration(yargs);
 })
-    .command("create-patch", "Create a patch file between two files", (yargs) => {
+    .command("create-patch", "Create a binary patch between two bundle files", (yargs) => {
     isValidCommandCategory = true;
     isValidCommand = true;
     yargs
-        .usage(USAGE_PREFIX + " create-patch path/to/oldfile path/to/newfile directory/to/save/bundle.patch")
+        .usage(USAGE_PREFIX + " create-patch path/to/old.bundle path/to/new.bundle directory/to/save/bundle.patch")
         .demand(/*count*/ 3, /*max*/ 3) // Require exactly three non-option arguments
-        .example("create-patch .old/index.android.bundle .new/index.android.bundle ./patch-dir", "Create a bundle.patch file using .old/index.android.bundle and .new/index.android.bundle and save it as ./patch-dir/bundle.patch");
+        .example("create-patch path/to/old.bundle path/to/new.bundle directory/to/save/bundle.patch", "Create a patch from old.bundle to new.bundle and save it as bundle.patch");
     addCommonConfiguration(yargs);
 })
-    .command("apply-patch", "Apply a patch to a file", (yargs) => {
+    .command("apply-patch", "Apply a binary patch to a bundle file", (yargs) => {
     isValidCommandCategory = true;
     isValidCommand = true;
     yargs
-        .usage(USAGE_PREFIX + " apply-patch path/to/oldfile path/to/bundle.patch path/to/newfile")
+        .usage(USAGE_PREFIX + " apply-patch path/to/old.bundle path/to/bundle.patch path/to/new.bundle")
         .demand(/*count*/ 3, /*max*/ 3) // Require exactly three non-option arguments
-        .example("apply-patch .old/index.android.bundle ./patch-dir/bundle.patch .new/index.android.bundle", "Apply bundle.patch to .old/index.android.bundle and save the result as .new/index.android.bundle");
+        .example("apply-patch path/to/old.bundle path/to/bundle.patch path/to/new.bundle", "Apply bundle.patch to old.bundle and save the result as new.bundle");
     addCommonConfiguration(yargs);
 })
     .command("whoami", "Display the account info for the current login session", (yargs) => {
@@ -1071,17 +1027,15 @@ function createCommand() {
                 }
                 break;
             case "link":
-                // Priority: --server option > positional arg > environment variable
                 cmd = {
                     type: cli.CommandType.link,
-                    serverUrl: getServerUrl(argv["server"]) || getServerUrl(arg1),
+                    serverUrl: getServerUrl(arg1),
                 };
                 break;
             case "login":
                 cmd = { type: cli.CommandType.login };
                 const loginCommand = cmd;
-                // Priority: --server option > positional arg > environment variable
-                loginCommand.serverUrl = getServerUrl(argv["server"]) || getServerUrl(arg1);
+                loginCommand.serverUrl = getServerUrl(arg1);
                 loginCommand.accessKey = argv["accessKey"];
                 break;
             case "logout":
@@ -1121,8 +1075,7 @@ function createCommand() {
             case "register":
                 cmd = { type: cli.CommandType.register };
                 const registerCommand = cmd;
-                // Priority: --server option > positional arg > environment variable
-                registerCommand.serverUrl = getServerUrl(argv["server"]) || getServerUrl(arg1);
+                registerCommand.serverUrl = getServerUrl(arg1);
                 break;
             case "release":
                 //console.log('arg0, arg1, arg2, arg3', arg0, arg1, arg2, arg3);
@@ -1140,8 +1093,6 @@ function createCommand() {
                     releaseCommand.noDuplicateReleaseError = argv["noDuplicateReleaseError"];
                     releaseCommand.rollout = getRolloutValue(argv["rollout"]);
                     releaseCommand.compression = argv["compression"];
-                    releaseCommand.isPatch = argv["isPatch"];
-                    releaseCommand.serverUrl = getServerUrl(argv["server"]);
                 }
                 break;
             case "release-react":
@@ -1172,7 +1123,6 @@ function createCommand() {
                     releaseReactCommand.xcodeProjectFile = argv["xcodeProjectFile"];
                     releaseReactCommand.xcodeTargetName = argv["xcodeTargetName"];
                     releaseReactCommand.buildConfigurationName = argv["buildConfigurationName"];
-                    releaseReactCommand.serverUrl = getServerUrl(argv["server"]);
                 }
                 break;
             case "rollback":

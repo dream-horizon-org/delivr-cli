@@ -461,11 +461,7 @@ export function execute(command: cli.ICommand) {
           );
         }
 
-        // Check if command has a serverUrl override (e.g., release commands)
-        const commandServerUrl = (command as any).serverUrl;
-        const effectiveServerUrl = commandServerUrl || connectionInfo.customServerUrl;
-        
-        sdk = getSdk(connectionInfo.accessKey, CLI_HEADERS, effectiveServerUrl);
+        sdk = getSdk(connectionInfo.accessKey, CLI_HEADERS, connectionInfo.customServerUrl);
         if((<cli.IAppCommand>command).appName) {
           const arg : string = (<cli.IAppCommand>command).appName
           const parsedName = cli.parseAppName(arg);
