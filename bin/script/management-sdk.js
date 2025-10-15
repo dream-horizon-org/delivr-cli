@@ -87,7 +87,7 @@ class AccountManager {
         return this._accessKey;
     }
     isAuthenticated(throwIfUnauthorized) {
-        return Promise((resolve, reject, notify) => {
+        return Promise((resolve, reject, _notify) => {
             const request = superagent.get(`${this._serverUrl}${urlEncode(["/authenticated"])}`);
             this.attachCredentials(request);
             request.end((err, res) => {
@@ -222,7 +222,7 @@ class AccountManager {
     addApp(appName) {
         //add tenant here
         const app = { name: appName };
-        let tenantId = this.getTenantId(this.passedOrgName);
+        const tenantId = this.getTenantId(this.passedOrgName);
         if (tenantId && tenantId.length > 0) {
             app.organisation = {};
             app.organisation.orgId = tenantId;
@@ -283,7 +283,7 @@ class AccountManager {
         return this.get(urlEncode([`/apps/${appName}/deployments/${deploymentName}/history`])).then((res) => res.body.history);
     }
     release(appName, deploymentName, filePath, targetBinaryVersion, updateMetadata, uploadProgressCallback, compression = 'brotli') {
-        return Promise((resolve, reject, notify) => {
+        return Promise((resolve, reject) => {
             updateMetadata.appVersion = targetBinaryVersion;
             const request = superagent.post(this._serverUrl + urlEncode([`/apps/${appName}/deployments/${deploymentName}/release`]));
             this.attachCredentials(request);
@@ -455,7 +455,7 @@ class AccountManager {
         return this.makeApiRequest("del", endpoint, /*requestBody=*/ null, expectResponseBody, /*contentType=*/ null);
     }
     makeApiRequest(method, endpoint, requestBody, expectResponseBody, contentType) {
-        return Promise((resolve, reject, notify) => {
+        return Promise((resolve, reject, _notify) => {
             let request = superagent[method](this._serverUrl + endpoint);
             this.attachCredentials(request);
             if (requestBody) {
@@ -529,10 +529,11 @@ class AccountManager {
         // console.log("this.organisations ::", this.organisations);
         // console.log("this.passedOrgName ::", this.passedOrgName);
         if (this.passedOrgName && this.passedOrgName.length > 0) {
+            // eslint-disable-next-line prefer-const
             let tenantId = this.getTenantId(this.passedOrgName);
             request.set("tenant", tenantId);
         }
-        let bearerToken = "cli-" + this._accessKey;
+        const bearerToken = "cli-" + this._accessKey;
         request.set("Accept", `application/vnd.code-push.v${AccountManager.API_VERSION}+json`);
         request.set("Authorization", `Bearer ${bearerToken}`);
         request.set("X-CodePush-SDK-Version", packageJson.version);

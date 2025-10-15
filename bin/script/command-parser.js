@@ -12,7 +12,8 @@ const packageJson = require("../../package.json");
 const ROLLOUT_PERCENTAGE_REGEX = /^(100|[1-9][0-9]|[1-9])%?$/;
 const USAGE_PREFIX = "Usage: code-push-standalone";
 // Command categories are:  access-key, app, release, deployment, deployment-key, login, logout, register
-let isValidCommandCategory = false;
+// eslint-disable-next-line no-var, @typescript-eslint/no-unused-vars
+var isValidCommandCategory = false;
 // Commands are the verb following the command category (e.g.:  "add" in "app add").
 let isValidCommand = false;
 let wasHelpShown = false;
@@ -95,7 +96,7 @@ function addCommonConfiguration(yargs) {
     yargs
         .wrap(/*columnLimit*/ null)
         .string("_") // Interpret non-hyphenated arguments as strings (e.g. an app version of '1.10').
-        .fail((msg) => showHelp()); // Suppress the default error message.
+        .fail((_msg) => showHelp()); // Suppress the default error message.
 }
 function orgList(commandName, yargs) {
     isValidCommand = true;
@@ -263,7 +264,7 @@ yargs
         .command("rm", "Remove an existing access key", (yargs) => accessKeyRemove("rm", yargs))
         .command("list", "List the access keys associated with your account", (yargs) => accessKeyList("list", yargs))
         .command("ls", "List the access keys associated with your account", (yargs) => accessKeyList("ls", yargs))
-        .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
+        .check((_argv, _aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
     addCommonConfiguration(yargs);
 })
     .command("org", "View and manage the organisations associated with your account", (yargs) => {
@@ -275,7 +276,7 @@ yargs
         .command("rm", "Remove an existing organisation", (yargs) => accessKeyRemove("rm", yargs))
         .command("list", "List the organisations associated with your account", (yargs) => orgList("list", yargs))
         .command("ls", "List the organisations associated with your account", (yargs) => orgList("ls", yargs))
-        .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
+        .check((_argv, _aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
     addCommonConfiguration(yargs);
 })
     .command("app", "View and manage your CodePush apps", (yargs) => {
@@ -311,7 +312,7 @@ yargs
             .example("app transfer MyApp foo@bar.com", 'Transfers the ownership of app "MyApp" to an account with email "foo@bar.com"');
         addCommonConfiguration(yargs);
     })
-        .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
+        .check((_argv, _aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
     addCommonConfiguration(yargs);
 })
     .command("collaborator", "View and manage app collaborators", (yargs) => {
@@ -331,7 +332,7 @@ yargs
         .command("rm", "Remove a collaborator from an app", (yargs) => removeCollaborator("rm", yargs))
         .command("list", "List the collaborators for an app", (yargs) => listCollaborators("list", yargs))
         .command("ls", "List the collaborators for an app", (yargs) => listCollaborators("ls", yargs))
-        .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
+        .check((_argv, _aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
     addCommonConfiguration(yargs);
 })
     .command("debug", "View the CodePush debug logs for a running app", (yargs) => {
@@ -380,7 +381,7 @@ yargs
         .command("ls", "List the deployments associated with an app", (yargs) => deploymentList("ls", yargs))
         .command("history", "Display the release history for a deployment", (yargs) => deploymentHistory("history", yargs))
         .command("h", "Display the release history for a deployment", (yargs) => deploymentHistory("h", yargs))
-        .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
+        .check((_argv, _aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
     addCommonConfiguration(yargs);
 })
     .command("link", "Link an additional authentication provider (e.g. GitHub) to an existing CodePush account", (yargs) => {
@@ -390,7 +391,7 @@ yargs
         .usage(USAGE_PREFIX + " link")
         .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl undocument parameter for testing
         .example("link", "Links an account on the CodePush server")
-        .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
+        .check((_argv, _aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
     addCommonConfiguration(yargs);
 })
     .command("login", "Authenticate with the CodePush server in order to begin managing your apps", (yargs) => {
@@ -408,7 +409,7 @@ yargs
         description: "Access key to authenticate against the CodePush server with, instead of providing your username and password credentials",
         type: "string",
     })
-        .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
+        .check((_argv, _aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
     addCommonConfiguration(yargs);
 })
     .command("logout", "Log out of the current session", (yargs) => {
@@ -468,7 +469,7 @@ yargs
         description: "Semver expression that specifies the binary app version(s) this release is targeting (e.g. 1.1.0, ~1.2.3).",
         type: "string",
     })
-        .check((argv, aliases) => {
+        .check((argv, _aliases) => {
         return isValidRollout(argv);
     });
     addCommonConfiguration(yargs);
@@ -527,7 +528,7 @@ yargs
         description: "Semver expression that specifies the binary app version(s) this release is targeting (e.g. 1.1.0, ~1.2.3). If omitted, the target binary version property from the release being promoted will be used.",
         type: "string",
     })
-        .check((argv, aliases) => {
+        .check((argv, _aliases) => {
         return isValidRollout(argv);
     });
     addCommonConfiguration(yargs);
@@ -539,7 +540,7 @@ yargs
         .usage(USAGE_PREFIX + " register")
         .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl undocument parameter for testing
         .example("register", "Registers a new CodePush account")
-        .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
+        .check((_argv, _aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
     addCommonConfiguration(yargs);
 })
     .command("release", "Release an update to an app deployment", (yargs) => {
@@ -604,7 +605,7 @@ yargs
         description: "Compression algorithm: 'brotli' (default, recommended) or 'deflate'",
         type: "string",
     })
-        .check((argv, aliases) => {
+        .check((argv, _aliases) => {
         return checkValidReleaseOptions(argv);
     });
     addCommonConfiguration(yargs);
@@ -766,7 +767,7 @@ yargs
         description: "Name of build configuration which specifies the binary version you want to target this release at. For example, 'Debug' or 'Release' (iOS only)",
         type: "string",
     })
-        .check((argv, aliases) => {
+        .check((argv, _aliases) => {
         return checkValidReleaseOptions(argv);
     });
     addCommonConfiguration(yargs);
@@ -795,7 +796,7 @@ yargs
         .command("rm", "Remove an existing login session", (yargs) => sessionRemove("rm", yargs))
         .command("list", "List the current login sessions associated with your account", (yargs) => sessionList("list", yargs))
         .command("ls", "List the current login sessions associated with your account", (yargs) => sessionList("ls", yargs))
-        .check((argv, aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
+        .check((_argv, _aliases) => isValidCommand); // Report unrecognized, non-hyphenated command category.
     addCommonConfiguration(yargs);
 })
     .command("create-patch", "Create a patch file between two files", (yargs) => {
@@ -828,7 +829,7 @@ yargs
     .alias("v", "version")
     .version(packageJson.version)
     .wrap(/*columnLimit*/ null)
-    .fail((msg) => showHelp(/*showRootDescription*/ true)).argv; // Suppress the default error message.
+    .fail((_msg) => showHelp(/*showRootDescription*/ true)).argv; // Suppress the default error message.
 function createCommand() {
     let cmd;
     const argv = yargs.parseSync();

@@ -127,7 +127,7 @@ class AccountManager {
   }
 
   public isAuthenticated(throwIfUnauthorized?: boolean): Promise<boolean> {
-    return Promise<any>((resolve, reject, notify) => {
+    return Promise<any>((resolve, reject, _notify) => {
       const request: superagent.Request<any> = superagent.get(`${this._serverUrl}${urlEncode(["/authenticated"])}`);
       this.attachCredentials(request);
       request.end((err: any, res: superagent.Response) => {
@@ -290,7 +290,7 @@ class AccountManager {
   public addApp(appName: string): Promise<App> {
     //add tenant here
     const app : any = { name: appName };
-    let tenantId = this.getTenantId(this.passedOrgName);
+    const tenantId = this.getTenantId(this.passedOrgName);
     if(tenantId && tenantId.length > 0){
         app.organisation = {}
         app.organisation.orgId = tenantId;
@@ -386,7 +386,7 @@ class AccountManager {
     uploadProgressCallback?: (progress: number) => void,
     compression: string = 'brotli'
   ): Promise<void> {
-    return Promise<void>((resolve, reject, notify) => {
+    return Promise<void>((resolve, reject) => {
       updateMetadata.appVersion = targetBinaryVersion;
       const request: superagent.Request<any> = superagent.post(
         this._serverUrl + urlEncode([`/apps/${appName}/deployments/${deploymentName}/release`])
@@ -614,7 +614,7 @@ class AccountManager {
     expectResponseBody: boolean,
     contentType: string
   ): Promise<JsonResponse> {
-    return Promise<JsonResponse>((resolve, reject, notify) => {
+    return Promise<JsonResponse>((resolve, reject, _notify) => {
       let request: superagent.Request<any> = (<any>superagent)[method](this._serverUrl + endpoint);
       this.attachCredentials(request);
 
@@ -693,10 +693,11 @@ class AccountManager {
     // console.log("this.organisations ::", this.organisations);
     // console.log("this.passedOrgName ::", this.passedOrgName);
     if(this.passedOrgName && this.passedOrgName.length > 0){
+        // eslint-disable-next-line prefer-const
         let tenantId = this.getTenantId(this.passedOrgName);
         request.set("tenant", tenantId);
     }
-    let bearerToken = "cli-" + this._accessKey;
+    const bearerToken = "cli-" + this._accessKey;
     request.set("Accept", `application/vnd.code-push.v${AccountManager.API_VERSION}+json`);
     request.set("Authorization", `Bearer ${bearerToken}`);
     request.set("X-CodePush-SDK-Version", packageJson.version);
