@@ -456,9 +456,18 @@ yargs
     isValidCommandCategory = true;
     isValidCommand = true;
     yargs
-      .usage(USAGE_PREFIX + " link")
-      .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl undocument parameter for testing
+      .usage(USAGE_PREFIX + " link [options]")
+      .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl parameter
       .example("link", "Links an account on the CodePush server")
+      .example("link --server https://my-server.com", "Links to a custom server")
+      .option("server", {
+        alias: "s",
+        default: null,
+        demand: false,
+        description:
+          "Custom server URL to use instead of the default. Can also be set via DELIVR_SERVER_URL environment variable",
+        type: "string",
+      })
       .check((argv: any, aliases: { [aliases: string]: string }): any => isValidCommand); // Report unrecognized, non-hyphenated command category.
 
     addCommonConfiguration(yargs);
@@ -468,15 +477,24 @@ yargs
     isValidCommand = true;
     yargs
       .usage(USAGE_PREFIX + " login [options]")
-      .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl undocument parameter for testing
+      .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl parameter
       .example("login", "Logs in to the CodePush server")
       .example("login --accessKey mykey", 'Logs in on behalf of the user who owns and created the access key "mykey"')
+      .example("login --server https://my-server.com", "Logs in to a custom server")
       .option("accessKey", {
         alias: "key",
         default: null,
         demand: false,
         description:
           "Access key to authenticate against the CodePush server with, instead of providing your username and password credentials",
+        type: "string",
+      })
+      .option("server", {
+        alias: "s",
+        default: null,
+        demand: false,
+        description:
+          "Custom server URL to use instead of the default. Can also be set via DELIVR_SERVER_URL environment variable",
         type: "string",
       })
       .check((argv: any, aliases: { [aliases: string]: string }): any => isValidCommand); // Report unrecognized, non-hyphenated command category.
@@ -628,9 +646,18 @@ yargs
     isValidCommandCategory = true;
     isValidCommand = true;
     yargs
-      .usage(USAGE_PREFIX + " register")
-      .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl undocument parameter for testing
+      .usage(USAGE_PREFIX + " register [options]")
+      .demand(/*count*/ 0, /*max*/ 1) //set 'max' to one to allow usage of serverUrl parameter
       .example("register", "Registers a new CodePush account")
+      .example("register --server https://my-server.com", "Registers on a custom server")
+      .option("server", {
+        alias: "s",
+        default: null,
+        demand: false,
+        description:
+          "Custom server URL to use instead of the default. Can also be set via DELIVR_SERVER_URL environment variable",
+        type: "string",
+      })
       .check((argv: any, aliases: { [aliases: string]: string }): any => isValidCommand); // Report unrecognized, non-hyphenated command category.
 
     addCommonConfiguration(yargs);
@@ -705,6 +732,14 @@ yargs
         default: "brotli",
         demand: false,
         description: "Compression algorithm: 'brotli' (default, recommended) or 'deflate'",
+        type: "string",
+      })
+      .option("server", {
+        alias: "s",
+        default: null,
+        demand: false,
+        description:
+          "Custom server URL to use instead of the default. Can also be set via DELIVR_SERVER_URL environment variable",
         type: "string",
       })
       .check((argv: any, aliases: { [aliases: string]: string }): any => {
@@ -884,6 +919,13 @@ yargs
         default: undefined,
         demand: false,
         description: "Name of build configuration which specifies the binary version you want to target this release at. For example, 'Debug' or 'Release' (iOS only)",
+        type: "string",
+      })
+      .option("server", {
+        default: null,
+        demand: false,
+        description:
+          "Custom server URL to use instead of the default. Can also be set via DELIVR_SERVER_URL environment variable",
         type: "string",
       })
       .check((argv: any, aliases: { [aliases: string]: string }): any => {
@@ -1216,9 +1258,10 @@ export function createCommand(): cli.ICommand {
         break;
 
       case "link":
+        // Priority: --server option > positional arg > environment variable
         cmd = <cli.ILinkCommand>{
           type: cli.CommandType.link,
-          serverUrl: getServerUrl(arg1),
+          serverUrl: getServerUrl(argv["server"] as string) || getServerUrl(arg1),
         };
         break;
 
@@ -1227,7 +1270,8 @@ export function createCommand(): cli.ICommand {
 
         const loginCommand = <cli.ILoginCommand>cmd;
 
-        loginCommand.serverUrl = getServerUrl(arg1);
+        // Priority: --server option > positional arg > environment variable
+        loginCommand.serverUrl = getServerUrl(argv["server"] as string) || getServerUrl(arg1);
         loginCommand.accessKey = argv["accessKey"] as any;
         break;
 
@@ -1277,7 +1321,8 @@ export function createCommand(): cli.ICommand {
 
         const registerCommand = <cli.IRegisterCommand>cmd;
 
-        registerCommand.serverUrl = getServerUrl(arg1);
+        // Priority: --server option > positional arg > environment variable
+        registerCommand.serverUrl = getServerUrl(argv["server"] as string) || getServerUrl(arg1);
         break;
 
       case "release":
@@ -1299,6 +1344,7 @@ export function createCommand(): cli.ICommand {
           releaseCommand.rollout = getRolloutValue(argv["rollout"] as any);
           releaseCommand.compression = argv["compression"] as any;
           releaseCommand.isPatch = argv["isPatch"] as boolean;
+          releaseCommand.serverUrl = getServerUrl(argv["server"] as string);
         }
         break;
 
@@ -1333,6 +1379,7 @@ export function createCommand(): cli.ICommand {
           releaseReactCommand.xcodeProjectFile = argv["xcodeProjectFile"] as any;
           releaseReactCommand.xcodeTargetName = argv["xcodeTargetName"] as any;
           releaseReactCommand.buildConfigurationName = argv["buildConfigurationName"] as any;
+          releaseReactCommand.serverUrl = getServerUrl(argv["server"] as string);
         }
         break;
 

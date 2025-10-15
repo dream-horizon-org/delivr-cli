@@ -461,7 +461,11 @@ export function execute(command: cli.ICommand) {
           );
         }
 
-        sdk = getSdk(connectionInfo.accessKey, CLI_HEADERS, connectionInfo.customServerUrl);
+        // Check if command has a serverUrl override (e.g., release commands)
+        const commandServerUrl = (command as any).serverUrl;
+        const effectiveServerUrl = commandServerUrl || connectionInfo.customServerUrl;
+        
+        sdk = getSdk(connectionInfo.accessKey, CLI_HEADERS, effectiveServerUrl);
         if((<cli.IAppCommand>command).appName) {
           const arg : string = (<cli.IAppCommand>command).appName
           const parsedName = cli.parseAppName(arg);

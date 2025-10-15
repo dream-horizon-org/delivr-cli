@@ -62,7 +62,9 @@ class AccountManager {
         OWNER: "Owner",
         COLLABORATOR: "Collaborator",
     };
-    static SERVER_URL = "http://localhost:3000";
+    // Server URL configuration with priority: CLI arg > Environment variable > Default
+    static DEFAULT_SERVER_URL = "http://localhost:3000";
+    static SERVER_URL = process.env.DELIVR_SERVER_URL || process.env.CODE_PUSH_SERVER_URL || AccountManager.DEFAULT_SERVER_URL;
     static API_VERSION = 2;
     static ERROR_GATEWAY_TIMEOUT = 504; // Used if there is a network error
     static ERROR_INTERNAL_SERVER = 500;
@@ -298,6 +300,7 @@ class AccountManager {
             });
             getPackageFilePromise.then((packageFile) => {
                 const file = fs.createReadStream(packageFile.path);
+                console.log('\nUploading Zip File of size ::', fs.statSync(packageFile.path).size);
                 request
                     .attach("package", file)
                     .field("packageInfo", JSON.stringify(updateMetadata))
