@@ -1,7 +1,7 @@
 {
-  "name": "code-push-cli",
+  "name": "@dream-sports-labs/delivr-cli",
   "version": "0.0.1",
-  "description": "Management CLI for the CodePush service - deploy mobile app updates over-the-air",
+  "description": "Management CLI for Delivr - deploy mobile app updates over-the-air",
   "main": "./script/cli.js",
   
   "scripts": {
@@ -22,8 +22,8 @@
     "local:link": "npm run build && npm link"
   },
   "bin": {
-    "code-push-standalone": "./bin/script/cli.js",
-    "codepush": "./bin/script/cli.js"
+    "delivr": "./bin/script/cli.js",
+    "delivr-cli": "./bin/script/cli.js"
   },
   "files": [
     "bin/**/*",
@@ -32,10 +32,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/code-push-server",
-    "directory": "cli"
+    "url": "git+https://github.com/dream-sports-labs/delivr-cli.git"
   },
   "keywords": [
+    "delivr",
     "codepush",
     "code-push",
     "react-native",
@@ -46,12 +46,12 @@
     "cli",
     "update"
   ],
-  "author": "Microsoft",
+  "author": "Dream Sports Labs",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/microsoft/code-push-server/issues"
+    "url": "https://github.com/dream-sports-labs/delivr-cli/issues"
   },
-  "homepage": "https://github.com/microsoft/code-push-server#readme",
+  "homepage": "https://github.com/dream-sports-labs/delivr-cli#readme",
   "engines": {
     "node": ">=14.0.0",
     "npm": ">=6.0.0"
