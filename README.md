@@ -76,9 +76,28 @@ code-push-standalone release <appName> <updateContents> <targetBinaryVersion>
 ```
 
 Parameters:
+
+Required Parameters:
 - `appName`: Name of your app (e.g., "MyApp-iOS")
 - `updateContents`: Path to your update files (bundle/assets)
-- `targetBinaryVersion`: App store version this update is for (e.g., "1.0.0" or "^1.0.0")
+- `targetBinaryVersion`: App store version this update is for. Can be:
+  - Exact version: "1.0.0"
+  - Range: "^1.0.0" (compatible with 1.x.x)
+  - Wildcard: "*" (all versions)
+
+Optional Parameters:
+- `--deploymentName` or `-d`: Target deployment ("Staging" or "Production", defaults to "Staging")
+- `--description` or `-des`: Release notes or changelog
+- `--disabled`: Prevents update from being downloaded (useful for staged rollouts)
+- `--mandatory`: Forces users to accept this update
+- `--noDuplicateReleaseError`: Shows warning instead of error if releasing same content
+- `--rollout`: Percentage of users who should receive this update (1-100)
+- `--isPatch`: Whether this is a patch update
+  - `false` (default): Full bundle update
+  - `true`: Patch update (requires patch bundle)
+- `--compression`: Compression algorithm to use
+  - `deflate` (default): Standard compression
+  - `brotli`: Better compression, smaller bundle size
 
 ### Full Bundle Release
 Release a complete new bundle:
@@ -133,5 +152,9 @@ code-push-standalone promote MyApp-iOS Staging Production
 # Promotion with options
 code-push-standalone promote MyApp-iOS Staging Production \
   --rollout 25 \                    # Release to 25% of users
-  --description "Verified update"    # Update description
+    --description "Verified update"    # Update description
 ```
+
+## Contributing
+
+For information about contributing to Delivr CLI, please see our [Contributing Guide](./CONTRIBUTING.md).
