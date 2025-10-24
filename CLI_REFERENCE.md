@@ -1,6 +1,59 @@
-# Advanced Usage Guide
+# Delivr CLI Reference Guide
 
-This document contains all available commands and detailed information about the Delivr CLI.
+A comprehensive reference for all Delivr CLI commands, options, and features.
+
+## Command Reference
+
+### Authentication Commands
+
+- [`register`](#authentication) - Create a new account
+- [`login`](#authentication) - Login to your account
+- [`logout`](#authentication) - Logout from your session
+- [`whoami`](#authentication) - Show the current logged in user
+- [`session ls`](#authentication) - List active sessions
+- [`session rm`](#authentication) - Remove a session
+- [`access-key add`](#access-keys) - Create an access key
+- [`access-key patch`](#access-keys) - Update an access key
+
+### App Management Commands
+
+- [`app add`](#app-management) - Create a new app
+- [`app ls`](#app-management) - List all apps
+- [`app rename`](#app-management) - Rename an app
+- [`app rm`](#app-management) - Remove an app
+- [`app transfer`](#app-collaboration) - Transfer app ownership
+- [`collaborator add`](#app-collaboration) - Add a collaborator
+- [`collaborator rm`](#app-collaboration) - Remove a collaborator
+- [`collaborator ls`](#app-collaboration) - List collaborators
+
+### Deployment Commands
+
+- [`deployment ls`](#deployment-management) - List deployments
+- [`deployment add`](#deployment-management) - Add a deployment
+- [`deployment rm`](#deployment-management) - Remove a deployment
+- [`deployment rename`](#deployment-management) - Rename a deployment
+- [`deployment clear`](#clearing-release-history) - Clear deployment history
+- [`deployment history`](#viewing-release-history) - View deployment history
+
+### Release Commands
+
+- [`release`](#releasing-updates-general) - Release an update
+- [`release-react`](#releasing-updates-react-native) - Release a React Native update
+- [`patch`](#patching-update-metadata) - Modify release metadata
+- [`promote`](#promoting-updates) - Promote a release
+- [`rollout`](#rollout-parameter) - Control gradual rollouts
+- [`rollback`](#rolling-back-updates) - Rollback a release
+
+### Binary Patch Commands
+
+- [`create-patch`](#creating-patches) - Create a binary patch
+- [`apply-patch`](#applying-patches) - Apply a binary patch
+
+### Debug Commands
+
+- [`debug`](#debugging-codepush-integration) - View debug logs
+
+---
 
 ## Binary Patch Operations
 
@@ -440,7 +493,6 @@ _NOTE: This parameter can be set using either `--mandatory` or `-m`_
 This specifies that if the update is identical to the latest release on the deployment, the CLI should generate a warning instead of an error. This is useful for continuous integration scenarios where it is expected that small modifications may trigger releases where no production code has changed.
 
 #### Rollout parameter
-
 **IMPORTANT: In order for this parameter to actually take affect, your end users need to be running version `1.9.0-beta+` (for React Native) of the CodePush plugin. If you release an update that specifies a rollout property, no end user running an older version of React Native plugins will be eligible for the update. Therefore, until you have adopted the neccessary version of the platform-specific CodePush plugin (as previously mentioned), we would advise not setting a rollout value on your releases, since no one would end up receiving it.**
 
 This specifies the percentage of users (as an integer between `1` and `100`) that should be eligible to receive this update. It can be helpful if you want to "flight" new releases with a portion of your audience (e.g. 25%), and get feedback and/or watch for exceptions/crashes, before making it broadly available for everyone. If this parameter isn't set, it is set to `100%`, and therefore, you only need to set it if you want to actually limit how many users will receive it.

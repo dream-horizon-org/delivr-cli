@@ -162,4 +162,4 @@ code-push-standalone promote MyApp-iOS Staging Production \
 For information about contributing to Delivr CLI, please see our [Contributing Guide](./CONTRIBUTING.md).
 
 ---
-**Note:** For additional commands and advanced features, see our [Advanced Usage Guide](./ADVANCED_USAGE.md).
+**Note:** For additional commands and advanced features, see our [Advanced Usage Guide](./CLI_REFERENCE.md).
