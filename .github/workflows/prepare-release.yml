@@ -61,10 +61,13 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
-          # Install dependencies first
+
+          # Install system dependencies
+          sudo apt-get update && sudo apt-get install -y libbz2-dev
+
+          # Install dependencies
           npm ci
-          
+
           # Create new branch
           git checkout -b release/v${{ steps.version.outputs.new_version }}
           
