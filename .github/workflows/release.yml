@@ -1,13 +1,15 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'  # Trigger on version tags
-  workflow_dispatch:  # Allows manual trigger from GitHub UI
+  pull_request:
+    types: [closed]
+    branches:
+      - main
 
 jobs:
   release:
+    # Only run if PR was merged and branch name starts with 'release/'
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
