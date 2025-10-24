@@ -1,0 +1,71 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      # Get current version and calculate new version
+      - name: Calculate new version
+        id: version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          NEW_VERSION=$(npm version ${{ github.event.inputs.version_type }} --no-git-tag-version)
+          echo "new_version=${NEW_VERSION#v}" >> $GITHUB_OUTPUT
+          echo "current_version=${CURRENT_VERSION}" >> $GITHUB_OUTPUT
+
+      # Generate release notes from commits
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          echo "## What's Changed" > release_notes.md
+          git log --pretty=format:"* %s" v${{ steps.version.outputs.current_version }}..HEAD >> release_notes.md
+          echo "" >> release_notes.md
+          echo "## Full Changelog" >> release_notes.md
+          echo "https://github.com/${{ github.repository }}/compare/v${{ steps.version.outputs.current_version }}...v${{ steps.version.outputs.new_version }}" >> release_notes.md
+
+      # Create PR branch
+      - name: Create release branch
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git checkout -b release/v${{ steps.version.outputs.new_version }}
+          git add package.json
+          git commit -m "chore: bump version to ${{ steps.version.outputs.new_version }}"
+          git push origin release/v${{ steps.version.outputs.new_version }}
+
+      # Create Pull Request
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'Release v${{ steps.version.outputs.new_version }}'
+          body: |
+            Automated release PR for version ${{ steps.version.outputs.new_version }}
+            
+            $(cat release_notes.md)
+          branch: release/v${{ steps.version.outputs.new_version }}
+          base: main
+          labels: release
+          draft: false
