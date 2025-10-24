@@ -1,6 +1,6 @@
 {
   "name": "@d11/delivr-cli",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Management CLI for Delivr - deploy mobile app updates over-the-air",
   "main": "./script/cli.js",
   "scripts": {
@@ -32,7 +32,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dream-sports-labs/delivr-cli.git"
+    "url": "git+https://github.com/ds-horizon/delivr-cli.git"
   },
   "keywords": [
     "delivr",
@@ -46,12 +46,12 @@
     "cli",
     "update"
   ],
-  "author": "Dream Sports Labs",
+  "author": "DS Horizon",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dream-sports-labs/delivr-cli/issues"
+    "url": "https://github.com/ds-horizon/delivr-cli/issues"
   },
-  "homepage": "https://github.com/dream-sports-labs/delivr-cli#readme",
+  "homepage": "https://github.com/ds-horizon/delivr-cli#readme",
   "engines": {
     "node": ">=14.0.0",
     "npm": ">=6.0.0"
