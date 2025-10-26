@@ -1,15 +1,10 @@
 name: Release
 
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   release:
-    # Only run if PR was merged and branch name starts with 'release/'
-    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
