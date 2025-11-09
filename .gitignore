@@ -30,7 +30,14 @@ node_modules
 # Build specific exclusions
 */bin/
 *.d.ts
+*.d.ts.map
 *.js.map
+
+# Generated files in script/ folder (compiled from TypeScript)
+script/**/*.js
+script/**/*.d.ts
+script/**/*.d.ts.map
+script/**/*.js.map
 
 # Environment variables
 *.env

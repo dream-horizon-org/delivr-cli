@@ -2,6 +2,24 @@
 
 The **Delivr CLI** is a Node.js application that allows users to deploy and manage over-the-air updates for React Native applications.
 
+## CLI vs SDK
+
+**Delivr CLI** (`@d11/delivr-cli`) and **Delivr SDK** (`@d11/dota`) are complementary tools:
+
+- **SDK (`@d11/dota`)**: React Native library that runs **inside your app** to receive and apply OTA updates
+- **CLI (`@d11/delivr-cli`)**: Command-line tool used **during development** to deploy updates to the CodePush server
+
+**Relationship:**
+- The CLI is automatically included when you install the SDK (`@d11/dota`) as a dev dependency
+- You need both: SDK in your app to receive updates, CLI to deploy updates
+- CLI is a development tool (not bundled in production apps)
+- SDK is a runtime library (bundled in your app)
+
+**Typical Workflow:**
+1. Install SDK in your React Native app: `npm install @d11/dota`
+2. Use CLI to deploy updates: `npx @d11/delivr-cli release MyApp ./bundle 1.0.0`
+3. App automatically receives and applies updates via SDK
+
 ## Installation & Usage
 
 ### Global Installation
@@ -126,13 +144,13 @@ For smaller updates, first create a patch and then release it:
 code-push-standalone create-patch \
   ./old-bundle \
   ./new-bundle \
-  ./.codepush/patches
+  ./.dota/patches
 ```
 
 2. Release the patch:
 ```bash
 # Release patch with brotli compression
-code-push-standalone release MyApp-iOS ./.codeupush/patches "1.0.0" \
+code-push-standalone release MyApp-iOS ./.dota/patches "1.0.0" \
   --deploymentName Staging \
   --description "Bug fixes" \
   --isPatch true \
