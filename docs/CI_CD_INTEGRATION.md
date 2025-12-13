@@ -78,7 +78,7 @@ code-push-standalone login https://delivr.example.com --accessKey "$DELIVR_ACCES
 Upload AAB (Android App Bundle) build artifacts to Delivr Release Management for Play Store releases.
 
 ```bash
-code-push-standalone upload-aab-build <ciRunId> <artifactPath> [options]
+code-push-standalone upload-aab-build <ciRunId> <artifactPath> --artifactVersion <version> [options]
 ```
 
 **Arguments:**
@@ -90,9 +90,10 @@ code-push-standalone upload-aab-build <ciRunId> <artifactPath> [options]
 
 **Options:**
 
-| Option | Alias | Description |
-|--------|-------|-------------|
-| `--buildNumber` | `-b` | Build number / versionCode from Play Store (if CI already uploaded the AAB) |
+| Option | Alias | Required | Description |
+|--------|-------|----------|-------------|
+| `--artifactVersion` | `-v` | Yes | Artifact version (e.g., 3.0.4) - validates artifact belongs to correct release |
+| `--buildNumber` | `-b` | No | Build number / versionCode from Play Store (if CI already uploaded the AAB) |
 
 **Behavior:**
 
@@ -198,7 +199,8 @@ pipeline {
                     
                     # Upload AAB build artifact
                     # $BUILD_URL is automatically set by Jenkins
-                    code-push-standalone upload-aab-build "$BUILD_URL" ./app/build/outputs/bundle/release/app-release.aab
+                    # $APP_VERSION should be set in your build (e.g., from build.gradle)
+                    code-push-standalone upload-aab-build "$BUILD_URL" ./app/build/outputs/bundle/release/app-release.aab --artifactVersion "$APP_VERSION"
                     
                     echo "Build artifact uploaded successfully!"
                 '''
@@ -265,6 +267,7 @@ pipeline {
                     # Upload with build number since we already uploaded to Play Store
                     code-push-standalone upload-aab-build "$BUILD_URL" \
                         ./app/build/outputs/bundle/release/app-release.aab \
+                        --artifactVersion "$APP_VERSION" \
                         --buildNumber "$VERSION_CODE"
                 '''
             }
@@ -320,7 +323,8 @@ if [ -z "$AAB_PATH" ]; then
 fi
 
 echo "Uploading AAB: $AAB_PATH"
-code-push-standalone upload-aab-build "$BUILD_URL" "$AAB_PATH"
+# APP_VERSION should be set in your build environment
+code-push-standalone upload-aab-build "$BUILD_URL" "$AAB_PATH" --artifactVersion "$APP_VERSION"
 
 echo "=== Upload Complete ==="
 ```
@@ -380,9 +384,13 @@ jobs:
           CI_RUN_ID="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           echo "CI Run ID: $CI_RUN_ID"
           
+          # Extract version from build.gradle or set it
+          APP_VERSION=$(./gradlew -q printVersionName)
+          
           # Upload AAB
           code-push-standalone upload-aab-build "$CI_RUN_ID" \
-            ./app/build/outputs/bundle/release/app-release.aab
+            ./app/build/outputs/bundle/release/app-release.aab \
+            --artifactVersion "$APP_VERSION"
 ```
 
 ### APK Regression Build Workflow
@@ -501,6 +509,7 @@ jobs:
           # Include build number since we already uploaded to Play Store
           code-push-standalone upload-aab-build "$CI_RUN_ID" \
             ./app/build/outputs/bundle/release/app-release.aab \
+            --artifactVersion "${{ steps.version.outputs.version_name }}" \
             --buildNumber "${{ steps.version.outputs.version_code }}"
 ```
 
@@ -666,7 +675,7 @@ nvm use 20
 
 ```bash
 # Option 1: Use npx (no global install needed)
-npx @d11/delivr-cli upload-aab-build "$BUILD_URL" ./app.aab "$DELIVR_SERVER_URL"
+npx @d11/delivr-cli upload-aab-build "$BUILD_URL" ./app.aab --artifactVersion "3.0.4"
 
 # Option 2: Install to user directory
 npm config set prefix ~/.npm-global

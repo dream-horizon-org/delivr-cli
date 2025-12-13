@@ -951,16 +951,22 @@ yargs
     isValidCommandCategory = true;
     isValidCommand = true;
     yargs
-      .usage(USAGE_PREFIX + " upload-aab-build <ciRunId> <artifactPath> [options]")
+      .usage(USAGE_PREFIX + " upload-aab-build <ciRunId> <artifactPath> --artifactVersion <version> [options]")
       .demand(/*count*/ 2, /*max*/ 2)
       .example(
-        "upload-aab-build $BUILD_URL ./app-release.aab",
+        'upload-aab-build $BUILD_URL ./app-release.aab --artifactVersion "3.0.4"',
         "Uploads the AAB build (system auto-uploads to Play Store internal track)"
       )
       .example(
-        'upload-aab-build $BUILD_URL ./app-release.aab --buildNumber "12345"',
+        'upload-aab-build $BUILD_URL ./app-release.aab --artifactVersion "3.0.4" --buildNumber "12345"',
         "Uploads the AAB with versionCode (CI already uploaded to Play Store)"
       )
+      .option("artifactVersion", {
+        alias: "v",
+        demand: true,
+        description: "Artifact version (e.g., 3.0.4) - used to validate artifact belongs to the correct release",
+        type: "string",
+      })
       .option("buildNumber", {
         alias: "b",
         default: null,
@@ -1446,14 +1452,19 @@ export function createCommand(): cli.ICommand {
 
       case "upload-aab-build":
         if (arg1 && arg2) {
-          cmd = { type: cli.CommandType.uploadAABBuild };
-          const uploadAABBuildCommand = <cli.IUploadAABBuildCommand>cmd;
-          uploadAABBuildCommand.ciRunId = arg1;
-          uploadAABBuildCommand.artifactPath = arg2;
-          const buildNumberOption = argv["buildNumber"] as string;
-          const hasBuildNumber = buildNumberOption && buildNumberOption.length > 0;
-          if (hasBuildNumber) {
-            uploadAABBuildCommand.buildNumber = buildNumberOption;
+          const artifactVersionOption = argv["artifactVersion"] as string;
+          const hasArtifactVersion = artifactVersionOption && artifactVersionOption.length > 0;
+          if (hasArtifactVersion) {
+            cmd = { type: cli.CommandType.uploadAABBuild };
+            const uploadAABBuildCommand = <cli.IUploadAABBuildCommand>cmd;
+            uploadAABBuildCommand.ciRunId = arg1;
+            uploadAABBuildCommand.artifactPath = arg2;
+            uploadAABBuildCommand.artifactVersion = artifactVersionOption;
+            const buildNumberOption = argv["buildNumber"] as string;
+            const hasBuildNumber = buildNumberOption && buildNumberOption.length > 0;
+            if (hasBuildNumber) {
+              uploadAABBuildCommand.buildNumber = buildNumberOption;
+            }
           }
         }
         break;

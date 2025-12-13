@@ -275,5 +275,6 @@ export interface IUploadTestFlightBuildNumberCommand extends ICommand {
 export interface IUploadAABBuildCommand extends ICommand {
   ciRunId: string;
   artifactPath: string;
+  artifactVersion: string;
   buildNumber?: string;
 }

@@ -1807,6 +1807,7 @@ function uploadTestFlightBuildNumber(command: cli.IUploadTestFlightBuildNumberCo
 function uploadAABBuild(command: cli.IUploadAABBuildCommand): Promise<void> {
   const ciRunId = command.ciRunId;
   const artifactPath = command.artifactPath;
+  const artifactVersion = command.artifactVersion;
   const buildNumber = command.buildNumber;
 
   const ciRunIdNotProvided = !ciRunId;
@@ -1817,6 +1818,11 @@ function uploadAABBuild(command: cli.IUploadAABBuildCommand): Promise<void> {
   const artifactPathNotProvided = !artifactPath;
   if (artifactPathNotProvided) {
     throw new Error("Artifact path is required.");
+  }
+
+  const artifactVersionNotProvided = !artifactVersion;
+  if (artifactVersionNotProvided) {
+    throw new Error("Artifact version is required. Use --artifactVersion to specify the release version (e.g., 3.0.4).");
   }
 
   const artifactFileNotExists = fileDoesNotExistOrIsDirectory(artifactPath);
@@ -1832,19 +1838,19 @@ function uploadAABBuild(command: cli.IUploadAABBuildCommand): Promise<void> {
 
   const hasBuildNumber = buildNumber && buildNumber.length > 0;
   if (hasBuildNumber) {
-    log(`Uploading build artifact "${artifactPath}" to CI run "${ciRunId}" with build number "${buildNumber}"...`);
+    log(`Uploading AAB build "${artifactPath}" (version ${artifactVersion}) to CI run "${ciRunId}" with build number "${buildNumber}"...`);
   } else {
-    log(`Uploading build artifact "${artifactPath}" to CI run "${ciRunId}"...`);
+    log(`Uploading AAB build "${artifactPath}" (version ${artifactVersion}) to CI run "${ciRunId}"...`);
     log("System will auto-upload to Play Store internal track.");
   }
 
   return sdk
-    .uploadAABBuild(ciRunId, artifactPath, buildNumber)
+    .uploadAABBuild(ciRunId, artifactPath, artifactVersion, buildNumber)
     .then((): void => {
-      log(`Successfully uploaded build artifact "${artifactPath}" to CI run "${ciRunId}".`);
+      log(`Successfully uploaded AAB build "${artifactPath}" (version ${artifactVersion}) to CI run "${ciRunId}".`);
     })
     .catch((error: CodePushError): void => {
-      const errorMessage = `Failed to upload build artifact: ${error.message}`;
+      const errorMessage = `Failed to upload AAB build: ${error.message}`;
       throw new Error(errorMessage);
     });
 }

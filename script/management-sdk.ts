@@ -486,16 +486,17 @@ class AccountManager {
   public uploadRegressionArtifact(ciRunId: string, artifactPath: string): Promise<void> {
     return Promise<void>((resolve, reject) => {
       const request: superagent.Request<any> = superagent.post(
-        this._serverUrl + urlEncode([`/builds/ci/${ciRunId}/artifact`])
+        this._serverUrl + urlEncode([`/builds/ci/artifact`])
       );
 
       this.attachCredentials(request);
 
       const file: any = fs.createReadStream(artifactPath);
 
-      request
-        .attach("artifact", file)
-        .end((err: any, res: superagent.Response) => {
+      request.field("ciRunId", ciRunId);
+      request.attach("artifact", file);
+
+      request.end((err: any, res: superagent.Response) => {
           if (err) {
             reject(this.getCodePushError(err, res));
             return;
@@ -521,7 +522,7 @@ class AccountManager {
     });
   }
 
-  public uploadAABBuild(ciRunId: string, artifactPath: string, buildNumber?: string): Promise<void> {
+  public uploadAABBuild(ciRunId: string, artifactPath: string, artifactVersion: string, buildNumber?: string): Promise<void> {
     return Promise<void>((resolve, reject) => {
       const request: superagent.Request<any> = superagent.post(
         this._serverUrl + urlEncode([`/builds/ci/artifact`])
@@ -532,6 +533,7 @@ class AccountManager {
       const file: any = fs.createReadStream(artifactPath);
 
       request.field("ciRunId", ciRunId);
+      request.field("artifactVersion", artifactVersion);
       request.attach("artifact", file);
 
       const hasBuildNumber = buildNumber && buildNumber.length > 0;
