@@ -128,7 +128,7 @@ class AccountManager {
 
   public isAuthenticated(throwIfUnauthorized?: boolean): Promise<boolean> {
     return Promise<any>((resolve, reject, _notify) => {
-      const request: superagent.Request<any> = superagent.get(`${this._serverUrl}${urlEncode(["/authenticated"])}`);
+      const request: superagent.Request<any> = superagent.get(this.joinUrl(urlEncode(["/authenticated"])));
       this.attachCredentials(request);
       request.end((err: any, res: superagent.Response) => {
         const status: number = this.getErrorStatus(err, res);
@@ -389,7 +389,7 @@ class AccountManager {
     return Promise<void>((resolve, reject) => {
       updateMetadata.appVersion = targetBinaryVersion;
       const request: superagent.Request<any> = superagent.post(
-        this._serverUrl + urlEncode([`/apps/${appName}/deployments/${deploymentName}/release`])
+        this.joinUrl(urlEncode([`/apps/${appName}/deployments/${deploymentName}/release`]))
       );
 
       this.attachCredentials(request);
@@ -486,7 +486,7 @@ class AccountManager {
   public uploadRegressionArtifact(ciRunId: string, artifactPath: string, artifactVersion: string): Promise<void> {
     return Promise<void>((resolve, reject) => {
       const request: superagent.Request<any> = superagent.post(
-        this._serverUrl + urlEncode([`/builds/ci/artifact`])
+        this.joinUrl(urlEncode([`/builds/ci/artifact`]))
       );
 
       this.attachCredentials(request);
@@ -526,7 +526,7 @@ class AccountManager {
   public uploadAABBuild(ciRunId: string, artifactPath: string, artifactVersion: string, buildNumber?: string): Promise<void> {
     return Promise<void>((resolve, reject) => {
       const request: superagent.Request<any> = superagent.post(
-        this._serverUrl + urlEncode([`/builds/ci/artifact`])
+        this.joinUrl(urlEncode([`/builds/ci/artifact`]))
       );
 
       this.attachCredentials(request);
@@ -696,7 +696,7 @@ class AccountManager {
     contentType: string
   ): Promise<JsonResponse> {
     return Promise<JsonResponse>((resolve, reject, _notify) => {
-      let request: superagent.Request<any> = (<any>superagent)[method](this._serverUrl + endpoint);
+      let request: superagent.Request<any> = (<any>superagent)[method](this.joinUrl(endpoint));
       this.attachCredentials(request);
 
       if (requestBody) {
@@ -763,6 +763,14 @@ class AccountManager {
 
   private getErrorMessage(error: Error, response: superagent.Response): string {
     return response && response.text ? response.text : error.message;
+  }
+
+  private joinUrl(path: string): string {
+    // Remove trailing slash from server URL
+    const serverUrl = this._serverUrl.replace(/\/+$/, '');
+    // Ensure path starts with /
+    const normalizedPath = path.startsWith('/') ? path : '/' + path;
+    return serverUrl + normalizedPath;
   }
 
   private attachCredentials(request: superagent.Request<any>): void {
