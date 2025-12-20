@@ -486,7 +486,7 @@ class AccountManager {
   public uploadRegressionArtifact(ciRunId: string, artifactPath: string, artifactVersion: string): Promise<void> {
     return Promise<void>((resolve, reject) => {
       const request: superagent.Request<any> = superagent.post(
-        this.joinUrl(urlEncode([`/builds/ci/artifact`]))
+        this.joinUrl(urlEncode([`/api/v1/builds/ci/artifact`]))
       );
 
       this.attachCredentials(request);
@@ -526,7 +526,7 @@ class AccountManager {
   public uploadAABBuild(ciRunId: string, artifactPath: string, artifactVersion: string, buildNumber?: string): Promise<void> {
     return Promise<void>((resolve, reject) => {
       const request: superagent.Request<any> = superagent.post(
-        this.joinUrl(urlEncode([`/builds/ci/artifact`]))
+        this.joinUrl(urlEncode([`/api/v1/builds/ci/artifact`]))
       );
 
       this.attachCredentials(request);
@@ -571,7 +571,7 @@ class AccountManager {
   public uploadTestFlightBuildNumber(ciRunId: string, testflightNumber: string, artifactVersion: string): Promise<void> {
     const requestBody = JSON.stringify({ ciRunId, testflightNumber, artifactVersion });
     return this.post(
-      urlEncode([`/builds/ci/testflight/verify`]),
+      urlEncode([`/api/v1/builds/ci/testflight/verify`]),
       requestBody,
       /*expectResponseBody=*/ false
     ).then(() => null);
