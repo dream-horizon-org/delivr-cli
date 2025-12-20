@@ -947,6 +947,72 @@ yargs
       .example("apply-patch .old/index.android.bundle ./patch-dir/bundle.patch .new/index.android.bundle", "Apply bundle.patch to .old/index.android.bundle and save the result as .new/index.android.bundle");
     addCommonConfiguration(yargs);
   })
+  .command("upload-aab-build", "Upload AAB build artifact to Delivr release management", (yargs: yargs.Argv) => {
+    isValidCommandCategory = true;
+    isValidCommand = true;
+    yargs
+      .usage(USAGE_PREFIX + " upload-aab-build <ciRunId> <artifactPath> --artifactVersion <version> [options]")
+      .demand(/*count*/ 2, /*max*/ 2)
+      .example(
+        'upload-aab-build $BUILD_URL ./app-release.aab --artifactVersion "3.0.4"',
+        "Uploads the AAB build (system auto-uploads to Play Store internal track)"
+      )
+      .example(
+        'upload-aab-build $BUILD_URL ./app-release.aab --artifactVersion "3.0.4" --buildNumber "12345"',
+        "Uploads the AAB with versionCode (CI already uploaded to Play Store)"
+      )
+      .option("artifactVersion", {
+        demand: true,
+        description: "Artifact version (e.g., 3.0.4) - used to validate artifact belongs to the correct release",
+        type: "string",
+      })
+      .option("buildNumber", {
+        alias: "b",
+        default: null,
+        demand: false,
+        description: "Build number / versionCode from Play Store (if CI already uploaded the AAB)",
+        type: "string",
+      });
+    addCommonConfiguration(yargs);
+  })
+  .command("upload-regression-artifact", "Upload APK/IPA regression build artifacts to Delivr", (yargs: yargs.Argv) => {
+    isValidCommandCategory = true;
+    isValidCommand = true;
+    yargs
+      .usage(USAGE_PREFIX + " upload-regression-artifact <ciRunId> <artifactPath> --artifactVersion <version>")
+      .demand(/*count*/ 2, /*max*/ 2)
+      .example(
+        'upload-regression-artifact $BUILD_URL ./app-release.apk --artifactVersion "3.0.4"',
+        "Uploads APK regression build to the CI run"
+      )
+      .example(
+        'upload-regression-artifact $BUILD_URL ./MyApp.ipa --artifactVersion "3.0.4"',
+        "Uploads IPA regression build to the CI run"
+      )
+      .option("artifactVersion", {
+        demand: true,
+        description: "Artifact version (e.g., 3.0.4) - used to validate artifact belongs to the correct release",
+        type: "string",
+      });
+    addCommonConfiguration(yargs);
+  })
+  .command("upload-testflight-build-number", "Upload TestFlight build number for iOS builds", (yargs: yargs.Argv) => {
+    isValidCommandCategory = true;
+    isValidCommand = true;
+    yargs
+      .usage(USAGE_PREFIX + " upload-testflight-build-number <ciRunId> <testflightNumber> --artifactVersion <version>")
+      .demand(/*count*/ 2, /*max*/ 2)
+      .example(
+        'upload-testflight-build-number $BUILD_URL 17965 --artifactVersion "3.0.4"',
+        "Uploads the TestFlight build number for the CI run"
+      )
+      .option("artifactVersion", {
+        demand: true,
+        description: "Artifact version (e.g., 3.0.4) - used to validate artifact belongs to the correct release",
+        type: "string",
+      });
+    addCommonConfiguration(yargs);
+  })
   .command("whoami", "Display the account info for the current login session", (yargs: yargs.Argv) => {
     isValidCommandCategory = true;
     isValidCommand = true;
@@ -1390,6 +1456,53 @@ export function createCommand(): cli.ICommand {
           applyPatchCommand.oldBundle = arg1;
           applyPatchCommand.patchFile = arg2;
           applyPatchCommand.outputBundle = arg3;
+        }
+        break;
+
+      case "upload-aab-build":
+        if (arg1 && arg2) {
+          const artifactVersionOption = argv["artifactVersion"] as string;
+          const hasArtifactVersion = artifactVersionOption && artifactVersionOption.length > 0;
+          if (hasArtifactVersion) {
+            cmd = { type: cli.CommandType.uploadAABBuild };
+            const uploadAABBuildCommand = <cli.IUploadAABBuildCommand>cmd;
+            uploadAABBuildCommand.ciRunId = arg1;
+            uploadAABBuildCommand.artifactPath = arg2;
+            uploadAABBuildCommand.artifactVersion = artifactVersionOption;
+            const buildNumberOption = argv["buildNumber"] as string;
+            const hasBuildNumber = buildNumberOption && buildNumberOption.length > 0;
+            if (hasBuildNumber) {
+              uploadAABBuildCommand.buildNumber = buildNumberOption;
+            }
+          }
+        }
+        break;
+
+      case "upload-regression-artifact":
+        if (arg1 && arg2) {
+          const artifactVersionOption = argv["artifactVersion"] as string;
+          const hasArtifactVersion = artifactVersionOption && artifactVersionOption.length > 0;
+          if (hasArtifactVersion) {
+            cmd = { type: cli.CommandType.uploadRegressionArtifact };
+            const uploadRegressionCommand = <cli.IUploadRegressionArtifactCommand>cmd;
+            uploadRegressionCommand.ciRunId = arg1;
+            uploadRegressionCommand.artifactPath = arg2;
+            uploadRegressionCommand.artifactVersion = artifactVersionOption;
+          }
+        }
+        break;
+
+      case "upload-testflight-build-number":
+        if (arg1 && arg2) {
+          const artifactVersionOption = argv["artifactVersion"] as string;
+          const hasArtifactVersion = artifactVersionOption && artifactVersionOption.length > 0;
+          if (hasArtifactVersion) {
+            cmd = { type: cli.CommandType.uploadTestFlightBuildNumber };
+            const uploadTestFlightCommand = <cli.IUploadTestFlightBuildNumberCommand>cmd;
+            uploadTestFlightCommand.ciRunId = arg1;
+            uploadTestFlightCommand.testflightNumber = arg2;
+            uploadTestFlightCommand.artifactVersion = artifactVersionOption;
+          }
         }
         break;
     }

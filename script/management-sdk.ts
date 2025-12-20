@@ -128,7 +128,7 @@ class AccountManager {
 
   public isAuthenticated(throwIfUnauthorized?: boolean): Promise<boolean> {
     return Promise<any>((resolve, reject, _notify) => {
-      const request: superagent.Request<any> = superagent.get(`${this._serverUrl}${urlEncode(["/authenticated"])}`);
+      const request: superagent.Request<any> = superagent.get(this.joinUrl(urlEncode(["/authenticated"])));
       this.attachCredentials(request);
       request.end((err: any, res: superagent.Response) => {
         const status: number = this.getErrorStatus(err, res);
@@ -389,7 +389,7 @@ class AccountManager {
     return Promise<void>((resolve, reject) => {
       updateMetadata.appVersion = targetBinaryVersion;
       const request: superagent.Request<any> = superagent.post(
-        this._serverUrl + urlEncode([`/apps/${appName}/deployments/${deploymentName}/release`])
+        this.joinUrl(urlEncode([`/apps/${appName}/deployments/${deploymentName}/release`]))
       );
 
       this.attachCredentials(request);
@@ -479,6 +479,100 @@ class AccountManager {
     return this.post(
       urlEncode([`/apps/${appName}/deployments/${deploymentName}/rollback/${targetRelease || ``}`]),
       /*requestBody=*/ null,
+      /*expectResponseBody=*/ false
+    ).then(() => null);
+  }
+
+  public uploadRegressionArtifact(ciRunId: string, artifactPath: string, artifactVersion: string): Promise<void> {
+    return Promise<void>((resolve, reject) => {
+      const request: superagent.Request<any> = superagent.post(
+        this.joinUrl(urlEncode([`/api/v1/builds/ci/artifact`]))
+      );
+
+      this.attachCredentials(request);
+
+      const file: any = fs.createReadStream(artifactPath);
+
+      request.field("ciRunId", ciRunId);
+      request.field("artifactVersion", artifactVersion);
+      request.attach("artifact", file);
+
+      request.end((err: any, res: superagent.Response) => {
+          if (err) {
+            reject(this.getCodePushError(err, res));
+            return;
+          }
+
+          if (res.ok) {
+            resolve(<void>null);
+          } else {
+            let body;
+            try {
+              body = JSON.parse(res.text);
+            } catch (parseError) {
+              // Ignore parse error
+            }
+
+            const errorMessage = body ? body.message : res.text;
+            reject(<CodePushError>{
+              message: errorMessage,
+              statusCode: res && res.status,
+            });
+          }
+        });
+    });
+  }
+
+  public uploadAABBuild(ciRunId: string, artifactPath: string, artifactVersion: string, buildNumber?: string): Promise<void> {
+    return Promise<void>((resolve, reject) => {
+      const request: superagent.Request<any> = superagent.post(
+        this.joinUrl(urlEncode([`/api/v1/builds/ci/artifact`]))
+      );
+
+      this.attachCredentials(request);
+
+      const file: any = fs.createReadStream(artifactPath);
+
+      request.field("ciRunId", ciRunId);
+      request.field("artifactVersion", artifactVersion);
+      request.attach("artifact", file);
+
+      const hasBuildNumber = buildNumber && buildNumber.length > 0;
+      if (hasBuildNumber) {
+        request.field("buildNumber", buildNumber);
+      }
+
+      request.end((err: any, res: superagent.Response) => {
+        if (err) {
+          reject(this.getCodePushError(err, res));
+          return;
+        }
+
+        if (res.ok) {
+          resolve(<void>null);
+        } else {
+          let body;
+          try {
+            body = JSON.parse(res.text);
+          } catch (parseError) {
+            // Ignore parse error
+          }
+
+          const errorMessage = body ? body.message : res.text;
+          reject(<CodePushError>{
+            message: errorMessage,
+            statusCode: res && res.status,
+          });
+        }
+      });
+    });
+  }
+
+  public uploadTestFlightBuildNumber(ciRunId: string, testflightNumber: string, artifactVersion: string): Promise<void> {
+    const requestBody = JSON.stringify({ ciRunId, testflightNumber, artifactVersion });
+    return this.post(
+      urlEncode([`/api/v1/builds/ci/testflight/verify`]),
+      requestBody,
       /*expectResponseBody=*/ false
     ).then(() => null);
   }
@@ -602,7 +696,7 @@ class AccountManager {
     contentType: string
   ): Promise<JsonResponse> {
     return Promise<JsonResponse>((resolve, reject, _notify) => {
-      let request: superagent.Request<any> = (<any>superagent)[method](this._serverUrl + endpoint);
+      let request: superagent.Request<any> = (<any>superagent)[method](this.joinUrl(endpoint));
       this.attachCredentials(request);
 
       if (requestBody) {
@@ -669,6 +763,14 @@ class AccountManager {
 
   private getErrorMessage(error: Error, response: superagent.Response): string {
     return response && response.text ? response.text : error.message;
+  }
+
+  private joinUrl(path: string): string {
+    // Remove trailing slash from server URL
+    const serverUrl = this._serverUrl.replace(/\/+$/, '');
+    // Ensure path starts with /
+    const normalizedPath = path.startsWith('/') ? path : '/' + path;
+    return serverUrl + normalizedPath;
   }
 
   private attachCredentials(request: superagent.Request<any>): void {
