@@ -128,7 +128,7 @@ export const confirm = (message: string = "Are you sure?"): Promise<boolean> => 
 };
 
 function accessKeyAdd(command: cli.IAccessKeyAddCommand): Promise<void> {
-  return sdk.addAccessKey(command.name, command.ttl).then((accessKey: AccessKey) => {
+  return sdk.addAccessKey(command.name, command.scope, command.ttl).then((accessKey: AccessKey) => {
     log(`Successfully created the "${command.name}" access key: ${accessKey.key}`);
     log("Make sure to save this key value somewhere safe, since you won't be able to view it from the CLI again!");
   });
@@ -142,7 +142,7 @@ function accessKeyPatch(command: cli.IAccessKeyPatchCommand): Promise<void> {
     throw new Error("A new name and/or TTL must be provided.");
   }
 
-  return sdk.patchAccessKey(command.oldName, command.newName, command.ttl).then((accessKey: AccessKey) => {
+  return sdk.patchAccessKey(command.oldName, command.scope, command.newName, command.ttl).then((accessKey: AccessKey) => {
     let logMessage: string = "Successfully ";
     if (willUpdateName) {
       logMessage += `renamed the access key "${command.oldName}" to "${command.newName}"`;
@@ -468,6 +468,8 @@ export function execute(command: cli.ICommand) {
         }
 
         sdk = getSdk(connectionInfo.accessKey, CLI_HEADERS, connectionInfo.customServerUrl);
+        let needsOrgContext = false;
+
         if((<cli.IAppCommand>command).appName) {
           const arg : string = (<cli.IAppCommand>command).appName
           const parsedName = cli.parseAppName(arg);
@@ -475,14 +477,36 @@ export function execute(command: cli.ICommand) {
           if(parsedName.ownerName) {
             (<cli.IAppCommand>command).appName = parsedName.appName;
             sdk.passedOrgName = parsedName.ownerName;
+            needsOrgContext = true;
           }
         } else if ((<cli.IAppListCommand>command).org && (<cli.IAppListCommand>command).org.length > 0) {
           const arg : string = (<cli.IAppListCommand>command).org
           sdk.passedOrgName = arg;
+          needsOrgContext = true;
+        }
+        
+        // Check for upload commands with org parameter
+        const uploadCommand = command as cli.IUploadRegressionArtifactCommand | cli.IUploadTestFlightBuildNumberCommand | cli.IUploadAABBuildCommand;
+        const hasUploadOrg = uploadCommand.org && uploadCommand.org.length > 0;
+        if (hasUploadOrg) {
+          sdk.passedOrgName = uploadCommand.org;
+          needsOrgContext = true;
+        }
+        
+        // Fetch organisations from backend if org context is needed
+        if (needsOrgContext) {
+          return sdk.getTenants().then(() => {
+            return executeCommand(command);
+          });
         }
         break;
     }
 
+    return executeCommand(command);
+  });
+}
+
+function executeCommand(command: cli.ICommand): Promise<void> {
     switch (command.type) {
       case cli.CommandType.accessKeyAdd:
         return accessKeyAdd(<cli.IAccessKeyAddCommand>command);
@@ -599,7 +623,6 @@ export function execute(command: cli.ICommand) {
         // We should never see this message as invalid commands should be caught by the argument parser.
         throw new Error("Invalid command:  " + JSON.stringify(command));
     }
-  });
 }
 
 function getTotalActiveFromDeploymentMetrics(metrics: DeploymentMetrics): number {
