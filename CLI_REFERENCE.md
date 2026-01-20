@@ -68,19 +68,19 @@ A comprehensive reference for all Delivr CLI commands, options, and features.
 ### upload-aab-build
 
 ```bash
-code-push-standalone upload-aab-build <ciRunId> <artifactPath> --artifactVersion <version> [--buildNumber <versionCode>]
+code-push-standalone upload-aab-build <ciRunId> <artifactPath> --artifactVersion <version> --org <orgName> [--buildNumber <versionCode>]
 ```
 
 ### upload-regression-artifact
 
 ```bash
-code-push-standalone upload-regression-artifact <ciRunId> <artifactPath>
+code-push-standalone upload-regression-artifact <ciRunId> <artifactPath> --artifactVersion <version> --org <orgName>
 ```
 
 ### upload-testflight-build-number
 
 ```bash
-code-push-standalone upload-testflight-build-number <ciRunId> <testflightNumber>
+code-push-standalone upload-testflight-build-number <ciRunId> <testflightNumber> --artifactVersion <version> --org <orgName>
 ```
 
 ---

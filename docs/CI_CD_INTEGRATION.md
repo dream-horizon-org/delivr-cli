@@ -71,7 +71,7 @@ code-push-standalone login https://delivr.example.com --accessKey "$DELIVR_ACCES
 Upload AAB (Android App Bundle) build artifacts to Delivr Release Management for Play Store releases.
 
 ```bash
-code-push-standalone upload-aab-build <ciRunId> <artifactPath> --artifactVersion <version> [options]
+code-push-standalone upload-aab-build <ciRunId> <artifactPath> --artifactVersion <version> --org <orgName> [options]
 ```
 
 **Arguments:**
@@ -86,6 +86,7 @@ code-push-standalone upload-aab-build <ciRunId> <artifactPath> --artifactVersion
 | Option | Alias | Required | Description |
 |--------|-------|----------|-------------|
 | `--artifactVersion` | `-v` | Yes | Artifact version (e.g., 3.0.4) - validates artifact belongs to correct release |
+| `--org` | `-o` | Yes | Organization name (e.g., MyOrg) |
 | `--buildNumber` | `-b` | No | Build number / versionCode from Play Store (if CI already uploaded the AAB) |
 
 **Behavior:**
@@ -100,7 +101,7 @@ code-push-standalone upload-aab-build <ciRunId> <artifactPath> --artifactVersion
 Upload APK or IPA regression build artifacts to Delivr Release Management.
 
 ```bash
-code-push-standalone upload-regression-artifact <ciRunId> <artifactPath> --artifactVersion <version>
+code-push-standalone upload-regression-artifact <ciRunId> <artifactPath> --artifactVersion <version> --org <orgName>
 ```
 
 **Arguments:**
@@ -115,6 +116,7 @@ code-push-standalone upload-regression-artifact <ciRunId> <artifactPath> --artif
 | Option | Alias | Required | Description |
 |--------|-------|----------|-------------|
 | `--artifactVersion` | `-v` | Yes | Artifact version (e.g., 3.0.4) - validates artifact belongs to correct release |
+| `--org` | `-o` | Yes | Organization name (e.g., MyOrg) |
 
 > **Note:** For AAB files, use `upload-aab-build` instead.
 
@@ -125,7 +127,7 @@ code-push-standalone upload-regression-artifact <ciRunId> <artifactPath> --artif
 Upload TestFlight build number to associate with an iOS CI run.
 
 ```bash
-code-push-standalone upload-testflight-build-number <ciRunId> <testflightNumber> --artifactVersion <version>
+code-push-standalone upload-testflight-build-number <ciRunId> <testflightNumber> --artifactVersion <version> --org <orgName>
 ```
 
 **Arguments:**
@@ -140,6 +142,7 @@ code-push-standalone upload-testflight-build-number <ciRunId> <testflightNumber>
 | Option | Alias | Required | Description |
 |--------|-------|----------|-------------|
 | `--artifactVersion` | `-v` | Yes | Artifact version (e.g., 3.0.4) - validates artifact belongs to correct release |
+| `--org` | `-o` | Yes | Organization name (e.g., MyOrg) |
 
 ---
 
@@ -221,8 +224,8 @@ pipeline {
                     
                     # Upload AAB build artifact - fails build on error
                     # $BUILD_URL is automatically set by Jenkins
-                    # $APP_VERSION should be set in your build (e.g., from build.gradle)
-                    code-push-standalone upload-aab-build "$BUILD_URL" ./app/build/outputs/bundle/release/app-release.aab --artifactVersion "$APP_VERSION"
+                    # $APP_VERSION and $ORG_NAME should be set in your build environment
+                    code-push-standalone upload-aab-build "$BUILD_URL" ./app/build/outputs/bundle/release/app-release.aab --artifactVersion "$APP_VERSION" --org "$ORG_NAME"
                     
                     echo "Build artifact uploaded successfully!"
                 '''
@@ -311,6 +314,7 @@ pipeline {
                     code-push-standalone upload-aab-build "$BUILD_URL" \
                         ./app/build/outputs/bundle/release/app-release.aab \
                         --artifactVersion "$APP_VERSION" \
+                        --org "$ORG_NAME" \
                         --buildNumber "$VERSION_CODE"
                 '''
             }
@@ -375,9 +379,9 @@ if [ -z "$AAB_PATH" ]; then
 fi
 
 echo "Uploading AAB: $AAB_PATH"
-# APP_VERSION should be set in your build environment
+# APP_VERSION and ORG_NAME should be set in your build environment
 # Fails build on error
-code-push-standalone upload-aab-build "$BUILD_URL" "$AAB_PATH" --artifactVersion "$APP_VERSION"
+code-push-standalone upload-aab-build "$BUILD_URL" "$AAB_PATH" --artifactVersion "$APP_VERSION" --org "$ORG_NAME"
 
 echo "=== Upload Complete ==="
 ```
@@ -453,7 +457,8 @@ jobs:
           # Upload AAB - fails workflow on error
           code-push-standalone upload-aab-build "$CI_RUN_ID" \
             ./app/build/outputs/bundle/release/app-release.aab \
-            --artifactVersion "$APP_VERSION"
+            --artifactVersion "$APP_VERSION" \
+            --org "$ORG_NAME"
       
       - name: Skip Delivr Upload (Internal Build)
         if: ${{ inputs.delivr_internal == true }}
@@ -520,7 +525,8 @@ jobs:
           # Upload APK regression build - fails workflow on error
           code-push-standalone upload-regression-artifact "$CI_RUN_ID" \
             ./app/build/outputs/apk/release/app-release.apk \
-            --artifactVersion "$APP_VERSION"
+            --artifactVersion "$APP_VERSION" \
+            --org "$ORG_NAME"
       
       - name: Skip Delivr Upload (Internal Build)
         if: ${{ inputs.delivr_internal == true }}
@@ -603,6 +609,7 @@ jobs:
           code-push-standalone upload-aab-build "$CI_RUN_ID" \
             ./app/build/outputs/bundle/release/app-release.aab \
             --artifactVersion "${{ steps.version.outputs.version_name }}" \
+            --org "$ORG_NAME" \
             --buildNumber "${{ steps.version.outputs.version_code }}"
       
       - name: Skip Delivr Upload (Internal Build)
@@ -675,7 +682,8 @@ jobs:
           
           # Upload IPA regression build - fails workflow on error
           code-push-standalone upload-regression-artifact "$CI_RUN_ID" ./build/MyApp.ipa \
-            --artifactVersion "$APP_VERSION"
+            --artifactVersion "$APP_VERSION" \
+            --org "$ORG_NAME"
       
       - name: Skip Delivr Upload (Internal Build)
         if: ${{ inputs.delivr_internal == true }}
@@ -755,7 +763,8 @@ jobs:
           # Upload TestFlight build number - fails workflow on error
           code-push-standalone upload-testflight-build-number "$CI_RUN_ID" \
             "${{ steps.testflight.outputs.build_number }}" \
-            --artifactVersion "$APP_VERSION"
+            --artifactVersion "$APP_VERSION" \
+            --org "$ORG_NAME"
       
       - name: Skip Delivr Upload (Internal Build)
         if: ${{ inputs.delivr_internal == true }}
@@ -806,7 +815,7 @@ nvm use 20
 
 ```bash
 # Option 1: Use npx (no global install needed)
-npx @d11/delivr-cli upload-aab-build "$BUILD_URL" ./app.aab --artifactVersion "3.0.4"
+npx @d11/delivr-cli upload-aab-build "$BUILD_URL" ./app.aab --artifactVersion "3.0.4" --org "MyOrg"
 
 # Option 2: Install to user directory
 npm config set prefix ~/.npm-global
@@ -824,6 +833,7 @@ npm install -g @d11/delivr-cli
 |----------|-------------|
 | `DELIVR_ACCESS_KEY` | Your Delivr access key |
 | `DELIVR_SERVER_URL` | Your Delivr server URL (e.g., `https://delivr.example.com`) |
+| `ORG_NAME` | Your organization name in Delivr (e.g., `MyOrg`) |
 
 ### Jenkins
 
