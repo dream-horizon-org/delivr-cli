@@ -115,14 +115,10 @@ class AccountManager {
   }
 
   public getTenants(): Promise<Organisation[]> {
-      return this.isAuthenticated(true)
-        .then(() => {
-          return this.get(urlEncode(["/tenants"]));
-        })
-        .then((res: JsonResponse) => {
-          this.organisations = res.body.organisations;
-          return res.body.organisations;
-        });
+      return this.get(urlEncode(["/tenants"])).then((res: JsonResponse) => {
+        this.organisations = res.body.organisations;
+        return res.body.organisations;
+      });
   }
 
   public getOrganisations(): Organisation[] {
